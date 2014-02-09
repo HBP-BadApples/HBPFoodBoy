@@ -1,6 +1,7 @@
 package FoodBoy;
 
 import java.applet.Applet;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -8,8 +9,6 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class Game extends Applet implements Runnable, KeyListener {
 
@@ -23,9 +22,10 @@ public class Game extends Applet implements Runnable, KeyListener {
 	private URL base;
 	private static Background bg1;
 	
-	private boolean deathBySpoil = false, gameOver = false;
+	private boolean deathBySpoil = true, gameOver = false;
 
 	private Animation aniL, aniR, ending;
+	private Button reset;
 
 	// public Queue<Food> food = new LinkedList<Food>();
 
@@ -47,7 +47,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 		}
 
 		man = new FatMan(this);
-		background = getImage(base, "data/background.png");
+		background = getImage(base, "img/bg.png");
 		leftBelt = new LeftConveyor(this);
 		rightBelt = new RightConveyor(this);
 		// food = new Food(this, Food.ICECREAMSUNDAE, 0, 240);
@@ -59,6 +59,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 		ending = new Animation();
 
 		updateAnimation();
+		reset = new Button(); 
 
 	}
 
@@ -95,9 +96,11 @@ public class Game extends Applet implements Runnable, KeyListener {
 			}
 
 			if (man.hp < 1) {
-				boomEnd();
 				gameOver = true;
-				break;
+				
+				if (!deathBySpoil)
+					boomEnd();
+				animate();
 			}
 		}
 		
@@ -107,6 +110,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 	public void animate() {
 		aniL.update(150);
 		aniR.update(150);
+		ending.update(150);
 	}
 
 	public void updateAnimation() {
@@ -144,6 +148,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 
 	@Override
 	public void paint(Graphics g) {
+		g.drawImage(background, this.getWidth()/10-110, this.getHeight()/10-30, this);
 		g.drawString("Weight (lbs): " + man.getWeight(),
 				this.getWidth() / 2 - 20, 30);
 		g.drawString("Health: " + man.getHP(), this.getWidth() / 2 - 10, 50);
@@ -184,9 +189,10 @@ public class Game extends Applet implements Runnable, KeyListener {
 			
 			
 		}
-		else {
-			for(int i = 6; i >= 1; i--)
-				g.drawImage(getImage(base, "img/explosion" + i + ".png"), this.getWidth()/2-540, this.getHeight()/2-300, this);
+		else 
+			if (!deathBySpoil){
+			//for(int i = 5; i >= 0; i--)
+				g.drawImage(getImage(base, "img/explosion" +0 + ".png"), this.getWidth()/2-540, this.getHeight()/2-300, this);
 		}
 			
 		// g.drawImage(food.getImage(), 60, 240, this);
@@ -208,14 +214,12 @@ public class Game extends Applet implements Runnable, KeyListener {
 						man.addWeight(mostRecent.getWeight());
 						mostRecent.image = null;
 						mostRecent = null;
-					} else if (mostRecent.isFatal() && mostRecent.image != null)
+					} else if (mostRecent.isFatal() && mostRecent.image != null) {
 						man.hp -= 5;
-					else if (mostRecent.image != null) {
-						man.hp--;
-						
-						if (man.hp < 1)
-							deathBySpoil = true;
+						deathBySpoil = false;
 					}
+					else if (mostRecent.image != null) 
+						man.hp--;
 			}
 			break;
 
@@ -228,14 +232,12 @@ public class Game extends Applet implements Runnable, KeyListener {
 					man.addWeight(mostRecent.getWeight());
 					mostRecent.image = null;
 					mostRecent = null;
-				} else if (mostRecent.isFatal() && mostRecent.image != null)
+				} else if (mostRecent.isFatal() && mostRecent.image != null) {
 					man.hp -= 5;
-				else if (mostRecent.image != null) {
-					man.hp--;
-					
-					if (man.hp < 1)
-						deathBySpoil = true;
+					deathBySpoil = false;
 				}
+				else if (mostRecent.image != null) 
+					man.hp--;
 
 			}
 			break;
@@ -270,7 +272,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 	
 	public void boomEnd () {
 		for(int i = 1; i <= 6; i++) {
-			ending.addFrame(getImage(base, "img/explosion" +5 +".png"), (long) 0.5);
+			ending.addFrame(getImage(base, "img/explosion" +i +".png"), (long) 250);
 		
 			if (image == null) {
 				image = createImage(this.getWidth(), this.getHeight());
