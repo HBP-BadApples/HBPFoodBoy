@@ -22,8 +22,10 @@ public class Game extends Applet implements Runnable, KeyListener {
 	// private Food food;
 	private URL base;
 	private static Background bg1;
+	
+	private boolean deathBySpoil = false, gameOver = false;
 
-	private Animation aniL, aniR;
+	private Animation aniL, aniR, ending;
 
 	// public Queue<Food> food = new LinkedList<Food>();
 
@@ -54,6 +56,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 
 		aniL = new Animation();
 		aniR = new Animation();
+		ending = new Animation();
 
 		updateAnimation();
 
@@ -91,9 +94,14 @@ public class Game extends Applet implements Runnable, KeyListener {
 				e.printStackTrace();
 			}
 
-			if (man.hp < 1)
+			if (man.hp < 1) {
+				boomEnd();
+				gameOver = true;
 				break;
+			}
 		}
+		
+		
 	}
 
 	public void animate() {
@@ -139,36 +147,48 @@ public class Game extends Applet implements Runnable, KeyListener {
 		g.drawString("Weight (lbs): " + man.getWeight(),
 				this.getWidth() / 2 - 20, 30);
 		g.drawString("Health: " + man.getHP(), this.getWidth() / 2 - 10, 50);
-		if (man.isLeft() == false && man.isRight() == false) {
-			g.drawImage(man.getDefaultImage(), 190, 85, this);
+		
+		if (!gameOver) {
+			if (man.isLeft() == false && man.isRight() == false) {
+				g.drawImage(man.getDefaultImage(), 190, 85, this);
+			}
+			if (man.isLeft() == true) {
+				g.drawImage(aniL.getImage(), 190, 85, this);
+				g.drawImage(getImage(this.base, "img/LHsploosh.png"), this.getWidth()/2-73, 140, this);
+			}
+	
+			if (man.isRight() == true) {
+				g.drawImage(aniR.getImage(), 190, 85, this);
+				g.drawImage(getImage(this.base, "img/RHsploosh.png"), this.getWidth()/2-73, 140, this);
+			}
+	
+			// g.drawImage(man.getImage(), 120, 75, this);
+			g.drawImage(leftBelt.getImage(), 0, this.getHeight()
+					- leftBelt.getImage().getHeight(this), this);
+			g.drawImage(rightBelt.getImage(), this.getWidth()
+					- rightBelt.getImage().getWidth(this), this.getHeight()
+					- rightBelt.getImage().getHeight(this), this);
+			// i+=5;
+			/*
+			 * for (Food e: food) { g.drawImage(e.getImage(), i, 240, this); }
+			 */
+	
+			for (Food e : leftBelt.leftConveyor) {
+				g.drawImage(e.getImage(), e.x, e.y, this);
+			}
+	
+			for (Food e : rightBelt.rightConveyor) {
+				g.drawImage(e.getImage(), e.x, e.y, this);
+			}
+			
+			
+			
 		}
-		if (man.isLeft() == true) {
-			g.drawImage(aniL.getImage(), 190, 85, this);
+		else {
+			for(int i = 6; i >= 1; i--)
+				g.drawImage(getImage(base, "img/explosion" + i + ".png"), this.getWidth()/2-540, this.getHeight()/2-300, this);
 		}
-
-		if (man.isRight() == true) {
-			g.drawImage(aniR.getImage(), 190, 85, this);
-		}
-
-		// g.drawImage(man.getImage(), 120, 75, this);
-		g.drawImage(leftBelt.getImage(), 0, this.getHeight()
-				- leftBelt.getImage().getHeight(this), this);
-		g.drawImage(rightBelt.getImage(), this.getWidth()
-				- rightBelt.getImage().getWidth(this), this.getHeight()
-				- rightBelt.getImage().getHeight(this), this);
-		// i+=5;
-		/*
-		 * for (Food e: food) { g.drawImage(e.getImage(), i, 240, this); }
-		 */
-
-		for (Food e : leftBelt.leftConveyor) {
-			g.drawImage(e.getImage(), e.x, e.y, this);
-		}
-
-		for (Food e : rightBelt.rightConveyor) {
-			g.drawImage(e.getImage(), e.x, e.y, this);
-		}
-
+			
 		// g.drawImage(food.getImage(), 60, 240, this);
 		// TODO Auto-generated method stub
 	}
@@ -182,9 +202,8 @@ public class Game extends Applet implements Runnable, KeyListener {
 		case KeyEvent.VK_LEFT:
 			man.grabLeft();
 			mostRecent = leftBelt.leftConveyor.peek();
-			if (mostRecent.x >= this.getWidth() / 2 - 300) {
+			if (mostRecent != null && mostRecent.x >= this.getWidth() / 2 - 300) {
 				mostRecent = leftBelt.leftConveyor.poll();
-				if (mostRecent != null) {
 					if (!(mostRecent.isHarmful() || mostRecent.isFatal())) {
 						man.addWeight(mostRecent.getWeight());
 						mostRecent.image = null;
@@ -193,29 +212,33 @@ public class Game extends Applet implements Runnable, KeyListener {
 						man.hp -= 5;
 					else if (mostRecent.image != null) {
 						man.hp--;
+						
+						if (man.hp < 1)
+							deathBySpoil = true;
 					}
-				}
 			}
 			break;
 
 		case KeyEvent.VK_RIGHT:
 			man.grabRight();
 			mostRecent = rightBelt.rightConveyor.peek();
-			if (mostRecent.x <= this.getWidth() / 2 + 200) {
+			if (mostRecent != null && mostRecent.x <= this.getWidth() / 2 + 200) {
 				mostRecent = rightBelt.rightConveyor.poll();
-				if (mostRecent != null) {
-					if (mostRecent.isHarmful())
-						man.hp--;
-					else if (mostRecent.isFatal())
-						man.hp -= 5;
-					else {
-						man.addWeight(mostRecent.getWeight());
-						mostRecent.image = null;
-						mostRecent = null;
-					}
-
+				if (!(mostRecent.isHarmful() || mostRecent.isFatal())) {
+					man.addWeight(mostRecent.getWeight());
+					mostRecent.image = null;
+					mostRecent = null;
+				} else if (mostRecent.isFatal() && mostRecent.image != null)
+					man.hp -= 5;
+				else if (mostRecent.image != null) {
+					man.hp--;
+					
+					if (man.hp < 1)
+						deathBySpoil = true;
 				}
+
 			}
+			break;
 		}
 	}
 
@@ -239,5 +262,22 @@ public class Game extends Applet implements Runnable, KeyListener {
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
+	}
+	
+	public FatMan returnMan () {
+		return man;
+	}
+	
+	public void boomEnd () {
+		for(int i = 1; i <= 6; i++) {
+			ending.addFrame(getImage(base, "img/explosion" +5 +".png"), (long) 0.5);
+		
+			if (image == null) {
+				image = createImage(this.getWidth(), this.getHeight());
+				second = image.getGraphics();
+			}
+			else
+				second.drawImage(ending.getImage(), this.getWidth()/2, this.getHeight()/2, this);
+		}
 	}
 }

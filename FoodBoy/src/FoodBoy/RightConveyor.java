@@ -1,6 +1,7 @@
 package FoodBoy;
 
 import java.awt.Image;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -33,10 +34,12 @@ public class RightConveyor{
 
 	public void update() {
 		stepper++;
-		count = 0;
+		//count = 0;
 		if (stepper % 13 == 0)
 			rightConveyor.add(new Food(game,(int) (Math.random()*5)+1, game.getWidth(), 500));
 
+		try { 
+			
 		for (Food e: rightConveyor) {
 			if (e.x > game.getWidth() - this.getImage().getWidth(game) - 20)
 				e.moveLeft();
@@ -47,12 +50,18 @@ public class RightConveyor{
 					if (e.x > game.getWidth() - this.getImage().getWidth(game) - 90 && e.y < 525)
 						e.fallNinetyR();
 					else {
+						if (!e.isFatal() && !e.isHarmful())
+							game.returnMan().hp--;
 						e.image = null;
-						count++;
+						rightConveyor.poll();
+						//count++;
 					}
 		}
-		for(int i = 0; i < count; i++)
-			rightConveyor.poll();
+		}
+		catch (ConcurrentModificationException e) {
+			
+		}
+		
 	}
 
 

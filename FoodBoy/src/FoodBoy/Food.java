@@ -62,6 +62,7 @@ public class Food {
 			weight = 25;
 			image = game.getImage(game.getBase(), "img/apple.png");
 			fall = "img/apple";
+			y = y + 40;
 			break;
 			
 		case CHICKENWAFFLE:
@@ -92,6 +93,7 @@ public class Food {
 			weight = 25;
 			image = game.getImage(game.getBase(), "img/pie.png");
 			fall = "img/pie";
+			y = y + 40;
 			break;
 		
 		case CAKE: 
@@ -99,6 +101,7 @@ public class Food {
 			weight = 50;
 			image = game.getImage(game.getBase(), "img/cake.png");
 			fall = "img/cake";
+			y = y + 40;
 			break;
 		
 		case RAMEN:
@@ -106,6 +109,7 @@ public class Food {
 			weight = 35;
 			image = game.getImage(game.getBase(), "img/ramen.png");
 			fall = "img/ramen";
+			y = y + 40;
 			break;
 		
 		case CEREAL:
