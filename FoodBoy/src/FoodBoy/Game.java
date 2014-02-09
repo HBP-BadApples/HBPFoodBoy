@@ -8,9 +8,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.net.URL;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class Game extends Applet implements Runnable, KeyListener {
 
@@ -91,7 +90,13 @@ public class Game extends Applet implements Runnable, KeyListener {
 
 				repaint();
 				try {
-					Thread.sleep(60);
+					int weight = man.getWeight();
+					if (weight < 300)
+						Thread.sleep(80);
+					else if (weight < 600)
+						Thread.sleep(60);
+					else
+						Thread.sleep(40);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -170,6 +175,9 @@ public class Game extends Applet implements Runnable, KeyListener {
 					this.getWidth() / 4 - 250, 300);
 			g.drawString("spoiled food/bombs!", this.getWidth() / 4 - 250, 400);
 			g.drawString("Health: " + man.getHP(), this.getWidth() / 2 + 300, 40);
+			g.drawString("Use the left or right", this.getWidth() / 2 + 150, 240);
+			g.drawString("arrow keys to eat!", this.getWidth() / 2 + 155, 300);
+			g.drawString("Don't let the food drop!", this.getWidth() / 2 + 130, 430);
 
 			g.setColor(Color.BLACK);
 			if (man.isLeft() == false && man.isRight() == false) {
@@ -208,10 +216,13 @@ public class Game extends Applet implements Runnable, KeyListener {
 
 		}
 		else if (gameOver) {
+		
 			g.drawImage(ending.getImage(), 0, 0, this);
 			g.setFont(font);
-			g.drawString("Game Over!", this.getWidth()/2 - 110, this.getHeight()/2);
-			g.drawString("You gained " + (man.getWeight() - 120) + " pounds!", this.getWidth()/2 - 200, this.getHeight()/2 + 40);
+			g.drawString("Game Over!", this.getWidth()/2 - 110, this.getHeight()/2 - 50);
+			g.drawString("You gained " + (man.getWeight() - 120) + " pounds!", this.getWidth()/2 - 200, this.getHeight()/2);
+			g.drawString("Press space to restart!", this.getWidth()/2 - 190, this.getHeight()/2 + 100);
+			
 		}
 	}
 
