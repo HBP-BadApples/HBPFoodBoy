@@ -8,7 +8,6 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 import java.net.URL;
 
 public class Game extends Applet implements Runnable, KeyListener {
@@ -23,7 +22,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 	private URL base;
 	private Font font = new Font("font/Ubuntu-L.ttf", Font.ITALIC, 40);
 
-	private boolean deathBySpoil = false, gameOver = false;
+	private boolean deathByBomb = false, gameOver = false, deathBySpoil = false;
 
 	private Animation aniL, aniR, ending;
 
@@ -33,6 +32,7 @@ public class Game extends Applet implements Runnable, KeyListener {
 
 	@Override
 	public void init() {
+		gameOver = false;
 		setSize(1080, 720);
 		setBackground(Color.WHITE);
 		setFocusable(true);
@@ -220,8 +220,17 @@ public class Game extends Applet implements Runnable, KeyListener {
 			g.drawImage(ending.getImage(), 0, 0, this);
 			g.setFont(font);
 			g.drawString("Game Over!", this.getWidth()/2 - 110, this.getHeight()/2 - 50);
+			/*
+			if (deathByBomb)
+				g.drawString("You died from a bomb!", this.getWidth()/2 - 200, this.getHeight()/2);
+			else
+				if (deathBySpoil)
+					g.drawString("You died from eating spoiled food!", this.getWidth()/2 - 200, this.getHeight()/2);
+				else
+					g.drawString("You died from wasting food!", this.getWidth()/2 - 200, this.getHeight()/2);
+			*/
 			g.drawString("You gained " + (man.getWeight() - 120) + " pounds!", this.getWidth()/2 - 200, this.getHeight()/2);
-			g.drawString("Press space to restart!", this.getWidth()/2 - 190, this.getHeight()/2 + 100);
+			g.drawString("Press space to restart or esc to quit!", this.getWidth()/2 - 270, this.getHeight()/2 + 100);
 			
 		}
 	}
@@ -241,11 +250,14 @@ public class Game extends Applet implements Runnable, KeyListener {
 					man.addWeight(mostRecent.getWeight());
 					mostRecent.image = null;
 					mostRecent = null;
-				} else if (mostRecent.isFatal() && mostRecent.image != null)
+				} else if (mostRecent.isFatal() && mostRecent.image != null) {
 					man.hp -= 5;
+					deathByBomb = true;
+				}
 				else if (mostRecent.image != null) {
 					man.hp--;
-
+					deathByBomb = true;
+					
 					if (man.hp < 1)
 						deathBySpoil = true;
 				}
@@ -261,10 +273,14 @@ public class Game extends Applet implements Runnable, KeyListener {
 					man.addWeight(mostRecent.getWeight());
 					mostRecent.image = null;
 					mostRecent = null;
-				} else if (mostRecent.isFatal() && mostRecent.image != null)
+				} else if (mostRecent.isFatal() && mostRecent.image != null) {
 					man.hp -= 5;
+					deathByBomb = true;
+				}
 				else if (mostRecent.image != null) {
 					man.hp--;
+					deathByBomb = true;
+						
 					if (man.hp < 1)
 						deathBySpoil = true;
 				}
@@ -274,8 +290,16 @@ public class Game extends Applet implements Runnable, KeyListener {
 		case KeyEvent.VK_SPACE:
 			if (gameOver) {
 				init();
-				gameOver = false;
 			}
+			break;
+			
+		case KeyEvent.VK_ESCAPE:
+			if (gameOver) {
+				System.exit(0);
+			}
+			break;
+			
+			
 		}
 	}
 
