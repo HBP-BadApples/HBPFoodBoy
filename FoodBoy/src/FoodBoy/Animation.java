@@ -25,6 +25,7 @@ public class Animation {
 		totalDuration += duration;
 		frames.add(new AnimFrame(image, totalDuration));
 	}
+	
 
 	public synchronized void update(long elapsedTime) {
 		if (frames.size() > 1) {
